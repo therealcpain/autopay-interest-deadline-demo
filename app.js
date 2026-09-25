@@ -1,9 +1,13 @@
 /**
- * Autopay Interest Deadline — paste view date + servicer autopay status
- * → days left to Sep 30 2026 11:59 p.m. ET + already-on vs enroll-via-servicer chip.
- * Brand: Autopay Interest Deadline only. User-pasted flags; no servicer login.
+ * Autopay Interest Deadline — date to count from (defaults to today) + servicer autopay
+ * status → days left to Sep 30 2026 11:59 p.m. ET + already-on vs enroll-through-servicer status.
+ * Brand: Autopay Interest Deadline only. Uses only what the user chooses; no servicer login.
  * Never invents eligibility, rates, or monthly savings. Not financial advice.
  * Not SAVE / repayment-plan advice. Public ED / StudentAid.gov framing only.
+ *
+ * ui_refresh 2026-09-25: phone-first layout + plain-language copy. Date math, phases,
+ * percentages, validation rules and share-hash format are unchanged from the
+ * previous release (see ui_refresh/checks/equivalence.js).
  */
 (function () {
   "use strict";
@@ -24,54 +28,54 @@
   const BENEFIT_LABEL = "Jun 30 2028";
 
   const CITE_ONE_LINER =
-    "ED Jun 18 2026: borrowers enrolled in auto pay may be eligible for a temporary 1% interest-rate reduction beginning Jul 1 2026; enroll by Sep 30 2026 (or already enrolled) to benefit through Jun 30 2028. Baseline autopay reduction was 0.25%; already-enrolled borrowers get an additional 0.75% automatically (total 1%). Enroll via your loan servicer account — not a StudentAid.gov autopay toggle. ED framing: Direct Loans originated after Jul 1 2012; defaulted borrowers must restore good standing first. Literacy only — not eligibility advice.";
+    "ED Jun 18 2026: borrowers enrolled in auto pay may be eligible for a temporary 1% interest-rate reduction beginning Jul 1 2026; enroll by Sep 30 2026 (or be already enrolled) to benefit through Jun 30 2028. The usual autopay reduction was 0.25%; borrowers already enrolled get an extra 0.75% automatically (1% total). Enroll through your loan servicer account — StudentAid.gov is not the autopay switch. ED’s description: Direct Loans originated after Jul 1 2012; borrowers in default must get back into good standing first. For understanding only — not eligibility advice.";
 
-  /** Teaching seeds — labeled dates/status. Not live servicer scrapes. */
+  /** Examples — labeled sample dates/status. Not pulled from any servicer. */
   const SEEDS = [
     {
       id: "not-on-17d",
       label: "Not on autopay · 17 days left",
-      sub: "Teaching · Sep 13 look · enroll via servicer",
+      sub: "Example · checked Sep 13 · enroll through your servicer",
       viewDate: "2026-09-13",
       autopay: "no",
       directLoan: "unknown",
-      noteLabel: "Not-on-autopay teaching seed",
+      noteLabel: "Example: not on autopay",
     },
     {
       id: "already-on",
       label: "Already on autopay · no extra action",
-      sub: "Teaching · already enrolled · +0.75% auto",
+      sub: "Example · already enrolled · extra 0.75% automatically",
       viewDate: "2026-09-13",
       autopay: "yes",
       directLoan: "yes",
-      noteLabel: "Already-on-autopay teaching seed",
+      noteLabel: "Example: already on autopay",
     },
     {
       id: "unsure-check",
-      label: "Unsure · check servicer",
-      sub: "Teaching · StudentAid.gov ≠ autopay toggle",
+      label: "Unsure · check with your servicer",
+      sub: "Example · StudentAid.gov is not the autopay switch",
       viewDate: "2026-09-13",
       autopay: "unsure",
       directLoan: "unsure",
-      noteLabel: "Unsure teaching seed",
+      noteLabel: "Example: not sure",
     },
     {
       id: "last-day",
       label: "Last day · Sep 30",
-      sub: "Teaching · enroll by 11:59 p.m. ET",
+      sub: "Example · enroll by 11:59 p.m. ET",
       viewDate: "2026-09-30",
       autopay: "no",
       directLoan: "unknown",
-      noteLabel: "Last-day teaching seed",
+      noteLabel: "Example: last day",
     },
     {
       id: "window-closed",
       label: "Window closed · Oct 1",
-      sub: "Teaching · enroll-by passed · no invented late path",
+      sub: "Example · deadline passed · no made-up late option",
       viewDate: "2026-10-01",
       autopay: "no",
       directLoan: "unknown",
-      noteLabel: "Post-deadline teaching seed",
+      noteLabel: "Example: after the deadline",
     },
   ];
 
@@ -149,24 +153,24 @@
         daysLabel:
           daysLeft === 1 ? "1 day left" : daysLeft + " days left",
         ringLabel: String(daysLeft),
-        deadlineSub: "Enroll-by " + DEADLINE_LABEL,
+        deadlineSub: "Enroll by " + DEADLINE_LABEL,
       };
     }
     if (daysLeft === 0) {
       return {
         phase: "last",
         headline: "Last day — enroll by 11:59 p.m. ET",
-        daysLabel: "TODAY · last day",
+        daysLabel: "Today is the last day",
         ringLabel: "TODAY",
-        deadlineSub: "Enroll-by " + DEADLINE_LABEL,
+        deadlineSub: "Enroll by " + DEADLINE_LABEL,
       };
     }
     return {
       phase: "closed",
-      headline: "Enroll-by window closed",
-      daysLabel: "CLOSED",
+      headline: "The enrollment window has closed",
+      daysLabel: "Closed",
       ringLabel: "CLOSED",
-      deadlineSub: "Sep 30 2026 enroll-by has passed",
+      deadlineSub: "The Sep 30 2026 enrollment deadline has passed",
     };
   }
 
@@ -174,24 +178,24 @@
     if (flag === "yes") {
       return {
         short: "After Jul 1 2012",
-        line: "You marked Direct Loan originated after Jul 1 2012 — that matches ED’s public framing. This is still not a determination that you are eligible.",
+        line: "You said your Direct Loan was originated (made) after Jul 1 2012 — that matches ED’s public description. This is still not a decision that you are eligible.",
       };
     }
     if (flag === "no") {
       return {
-        short: "Not that cohort",
-        line: "You marked that this is not a Direct Loan originated after Jul 1 2012. ED’s public framing is for that cohort — we do not invent eligibility for other loans.",
+        short: "Other loan type",
+        line: "You said this is not a Direct Loan originated after Jul 1 2012. ED’s public description is for that group of loans — we do not invent eligibility for other loans.",
       };
     }
     if (flag === "unsure") {
       return {
-        short: "Unsure",
-        line: "Direct Loan originated-after-Jul 1 2012 flag is unsure. Eligibility is not confirmed from your paste — check your servicer / StudentAid.gov.",
+        short: "Not sure",
+        line: "You’re not sure whether this is a Direct Loan originated after Jul 1 2012. Eligibility is not confirmed by what you entered — check with your servicer or StudentAid.gov.",
       };
     }
     return {
       short: "Not confirmed",
-      line: "No Direct Loan originated-after-Jul 1 2012 flag pasted. Eligibility is not confirmed from your paste — we never invent it.",
+      line: "You didn’t say whether this is a Direct Loan originated after Jul 1 2012. Eligibility is not confirmed by what you entered — we never invent it.",
     };
   }
 
@@ -205,11 +209,11 @@
           pill: "Already on autopay",
           sub: "If enrolled by Sep 30 · benefit through Jun 30 2028",
           cls: "ok",
-          flag: "ALREADY ON AUTOPAY · no extra action for the temporary 1% · we do not invent whether you qualified",
+          flag: "You’re already on autopay — no extra action for the temporary 1%. We don’t guess whether you qualified.",
           decoder:
-            "You marked already on servicer autopay. ED: already-enrolled borrowers get the additional 0.75% automatically (total 1%). The Sep 30 enroll-by has passed. If you were on autopay by that date, ED says the reduction runs through Jun 30 2028 — this card does not confirm your account.",
+            "You said you’re already on autopay with your servicer. ED: borrowers already enrolled get the extra 0.75% automatically (1% total). The Sep 30 enrollment deadline has passed. If you were on autopay by that date, ED says the reduction runs through Jun 30 2028 — this page can’t confirm your account.",
           action:
-            "Calm next step: confirm autopay and the reduction on your loan servicer account. Details at the StudentAid.gov auto-pay interest-rate-reduction page. This card does not log in or change your loans.",
+            "Check your loan servicer account to confirm autopay and the reduction. Details are on the StudentAid.gov auto-pay interest-rate-reduction page. This page doesn’t log in or change your loans.",
           short: "Already on",
         };
       }
@@ -217,11 +221,11 @@
         pill: "Already on autopay",
         sub: "No extra action for the temporary 1% reduction",
         cls: "ok",
-        flag: "ALREADY ON AUTOPAY · no extra action for the temporary 1% reduction",
+        flag: "You’re already on autopay — no extra action for the temporary 1% reduction.",
         decoder:
-          "You marked already on servicer autopay. ED Jun 18 2026: already-enrolled borrowers get the additional 0.75% automatically (total 1%) — no extra enroll step for this temporary reduction. Confirm on your servicer; we do not see your account.",
+          "You said you’re already on autopay with your servicer. ED Jun 18 2026: borrowers already enrolled get the extra 0.75% automatically (1% total) — no extra enrollment step for this temporary reduction. Confirm with your servicer; we can’t see your account.",
         action:
-          "Calm next step: confirm autopay is on in your loan servicer account (not StudentAid.gov). Details at StudentAid.gov. This card does not change your loans.",
+          "Confirm autopay is on in your loan servicer account (not StudentAid.gov). Details are on StudentAid.gov. This page doesn’t change your loans.",
         short: "Already on",
       };
     }
@@ -230,38 +234,38 @@
       if (closed) {
         return {
           pill: "Window closed",
-          sub: "Sep 30 enroll-by passed · no invented late path",
+          sub: "Sep 30 deadline passed · no made-up late option",
           cls: "danger",
-          flag: "WINDOW CLOSED · not on autopay · this card does not invent a late-enroll path",
+          flag: "The window has closed and you’re not on autopay. This page doesn’t make up a late-enrollment option.",
           decoder:
-            "You marked not on servicer autopay, and the public Sep 30 2026 enroll-by has passed. We do not invent a late-enrollment exception. Check your servicer / StudentAid.gov for your actual status.",
+            "You said you’re not on autopay with your servicer, and the public Sep 30 2026 deadline to enroll has passed. We do not invent a late-enrollment exception. Check with your servicer or StudentAid.gov for your actual status.",
           action:
-            "Calm next step: log into your loan servicer and read the StudentAid.gov auto-pay interest-rate-reduction page. This card is calendar literacy only — not eligibility or plan advice.",
+            "Log in to your loan servicer and read the StudentAid.gov auto-pay interest-rate-reduction page. This page only explains the calendar — it is not eligibility or plan advice.",
           short: "Not on · closed",
         };
       }
       if (last) {
         return {
-          pill: "Last day · enroll via servicer",
+          pill: "Last day · enroll through your servicer",
           sub: "Enroll by 11:59 p.m. ET today in your servicer account",
           cls: "danger",
-          flag: "LAST DAY · not on autopay · enroll via servicer by 11:59 p.m. ET",
+          flag: "Today is the last day and you’re not on autopay. Enroll through your servicer by 11:59 p.m. ET.",
           decoder:
-            "You marked not on servicer autopay. Public enroll-by is today — Sep 30 2026 11:59 p.m. ET. Enroll in autopay in your loan servicer account. StudentAid.gov is not the autopay toggle. We do not invent that you are eligible.",
+            "You said you’re not on autopay with your servicer. The public deadline to enroll is today — Sep 30 2026 11:59 p.m. ET. Enroll in autopay in your loan servicer account. StudentAid.gov is not the autopay switch. We do not invent that you are eligible.",
           action:
-            "Calm next step: enroll in autopay in your loan servicer account today. Details at the StudentAid.gov auto-pay interest-rate-reduction page. Not plan advice. Not a Loan Simulator.",
+            "Enroll in autopay in your loan servicer account today. Details are on the StudentAid.gov auto-pay interest-rate-reduction page. Not plan advice. Not a Loan Simulator.",
           short: "Not on · last day",
         };
       }
       return {
-        pill: "Enroll via servicer",
+        pill: "Enroll through your servicer",
         sub: "Not on autopay · enroll in your servicer account",
         cls: "warn",
-        flag: "NOT ON AUTOPAY · enroll via servicer by Sep 30 2026 11:59 p.m. ET",
+        flag: "You’re not on autopay yet. Enroll through your servicer by Sep 30 2026 11:59 p.m. ET.",
         decoder:
-          "You marked not on servicer autopay. ED: enroll by Sep 30 2026 (or already enrolled) to benefit through Jun 30 2028. Enrollment is in your loan servicer account — not a StudentAid.gov autopay toggle. We do not invent eligibility, your rate, or monthly savings.",
+          "You said you’re not on autopay with your servicer. ED: enroll by Sep 30 2026 (or be already enrolled) to benefit through Jun 30 2028. You enroll in your loan servicer account — StudentAid.gov is not the autopay switch. We do not invent eligibility, your rate, or monthly savings.",
         action:
-          "Calm next step: enroll in autopay in your loan servicer account. Details at the StudentAid.gov auto-pay interest-rate-reduction page. Not SAVE / repayment-plan advice.",
+          "Enroll in autopay in your loan servicer account. Details are on the StudentAid.gov auto-pay interest-rate-reduction page. Not SAVE / repayment-plan advice.",
         short: "Not on",
       };
     }
@@ -269,39 +273,39 @@
     // unsure
     if (closed) {
       return {
-        pill: "Window closed · check servicer",
+        pill: "Window closed · check with your servicer",
         sub: "Confirm whether you were enrolled by Sep 30",
         cls: "unsure",
-        flag: "WINDOW CLOSED · autopay unsure · check servicer · no invented status",
+        flag: "The window has closed and you’re not sure about autopay. Check with your servicer — we won’t guess your status.",
         decoder:
-          "You marked autopay status unsure, and the public Sep 30 2026 enroll-by has passed. Confirm with your servicer whether you were enrolled by that date. We do not invent your status or a late-enroll path.",
+          "You said you’re not sure about your autopay status, and the public Sep 30 2026 deadline to enroll has passed. Confirm with your servicer whether you were enrolled by that date. We do not invent your status or a late-enrollment option.",
         action:
-          "Calm next step: log into your loan servicer (not StudentAid.gov) and read the official auto-pay interest-rate-reduction page. This card does not determine eligibility.",
+          "Log in to your loan servicer (not StudentAid.gov) and read the official auto-pay interest-rate-reduction page. This page does not decide eligibility.",
         short: "Unsure · closed",
       };
     }
     if (last) {
       return {
-        pill: "Last day · check servicer",
-        sub: "Confirm today · StudentAid.gov ≠ autopay toggle",
+        pill: "Last day · check with your servicer",
+        sub: "Confirm today · StudentAid.gov is not the autopay switch",
         cls: "warn",
-        flag: "LAST DAY · autopay unsure · check servicer by 11:59 p.m. ET",
+        flag: "Today is the last day and you’re not sure about autopay. Check with your servicer by 11:59 p.m. ET.",
         decoder:
-          "You marked autopay status unsure. Public enroll-by is today — Sep 30 2026 11:59 p.m. ET. StudentAid.gov is not the autopay switch. Check your servicer account before the cutoff. We do not invent your status.",
+          "You said you’re not sure about your autopay status. The public deadline to enroll is today — Sep 30 2026 11:59 p.m. ET. StudentAid.gov is not the autopay switch. Check your servicer account before the cutoff. We do not invent your status.",
         action:
-          "Calm next step: open your loan servicer account and confirm autopay. Details at StudentAid.gov. Not financial advice.",
+          "Open your loan servicer account and confirm autopay. Details are on StudentAid.gov. Not financial advice.",
         short: "Unsure · last day",
       };
     }
     return {
       pill: "Check your servicer",
-      sub: "Unsure · StudentAid.gov is not the autopay toggle",
+      sub: "Unsure · StudentAid.gov is not the autopay switch",
       cls: "unsure",
-      flag: "AUTOPAY UNSURE · check servicer · StudentAid.gov ≠ autopay toggle",
+      flag: "Not sure if you’re on autopay? Check with your servicer — StudentAid.gov is not the autopay switch.",
       decoder:
-        "You marked autopay status unsure. Many borrowers confuse StudentAid.gov with servicer autopay. Confirm in your loan servicer account. Enroll by Sep 30 2026 11:59 p.m. ET (or already enrolled) per ED — we do not invent whether you already qualify.",
+        "You said you’re not sure about your autopay status. Many borrowers mix up StudentAid.gov with servicer autopay. Confirm in your loan servicer account. Enroll by Sep 30 2026 11:59 p.m. ET (or be already enrolled), per ED — we do not invent whether you already qualify.",
       action:
-        "Calm next step: log into your loan servicer and look for auto pay / autopay. Details at the StudentAid.gov auto-pay interest-rate-reduction page. Not plan advice.",
+        "Log in to your loan servicer and look for auto pay / autopay. Details are on the StudentAid.gov auto-pay interest-rate-reduction page. Not plan advice.",
       short: "Unsure",
     };
   }
@@ -325,7 +329,7 @@
   function validate(input) {
     const d = parseISODate(input.viewDate);
     if (!d) {
-      return "Pick a view date (the day you’re looking) — the countdown needs it. We will not invent days left.";
+      return "Pick a date to count from (the view date — usually today). We won’t guess the days left.";
     }
     return null;
   }
@@ -407,90 +411,142 @@
         s.label + '<span class="chip-sub">' + s.sub + "</span>";
       btn.addEventListener("click", () => {
         applyInputs(s);
-        $("status").textContent = "Loaded seed: " + s.label;
-        renderCard();
+        renderCard({ writeHash: true });
+        $("status").textContent = "Showing example: " + s.label;
+        scrollToCard();
       });
       box.appendChild(btn);
     });
   }
 
-  function renderSources() {
-    $("sourceLinks").innerHTML =
-      'Cites: <a href="' +
-      ED_PRESS +
-      '" target="_blank" rel="noopener noreferrer">ED Jun 18 2026</a>' +
-      '<a href="' +
-      STUDENTAID +
-      '" target="_blank" rel="noopener noreferrer">StudentAid.gov auto-pay reduction</a>' +
-      '<a href="' +
-      BI_SEP1 +
-      '" target="_blank" rel="noopener noreferrer">BI Sep 1 2026 (example math is theirs)</a>' +
-      '<a href="' +
-      FORBES_JUL29 +
-      '" target="_blank" rel="noopener noreferrer">Forbes Jul 29 2026 (pitfalls)</a>';
+  /** Put text into el, turning known source names into their (existing) links. */
+  const LINKS = [
+    ["StudentAid.gov auto-pay interest-rate-reduction page", STUDENTAID],
+    ["official auto-pay interest-rate-reduction page", STUDENTAID],
+  ];
+  function setLinkedText(el, text) {
+    el.textContent = "";
+    let rest = String(text);
+    while (rest) {
+      let hit = null;
+      LINKS.forEach(([k, url]) => {
+        const i = rest.indexOf(k);
+        if (i !== -1 && (!hit || i < hit.i)) hit = { i: i, k: k, url: url };
+      });
+      if (!hit) {
+        el.appendChild(document.createTextNode(rest));
+        break;
+      }
+      if (hit.i) el.appendChild(document.createTextNode(rest.slice(0, hit.i)));
+      const a = document.createElement("a");
+      a.href = hit.url;
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+      a.textContent = hit.k;
+      el.appendChild(a);
+      rest = rest.slice(hit.i + hit.k.length);
+    }
   }
 
-  function renderCard() {
+  /** Display only: keep "Sep 30 2026" and "11:59 p.m. ET" from breaking across lines. */
+  function keepTogether(text) {
+    return String(text)
+      .replace(/11:59 p\.m\. ET/g, "11:59\u00a0p.m.\u00a0ET")
+      .replace(/([A-Z][a-z]{2}) (\d{1,2}) (\d{4})/g, "$1\u00a0$2\u00a0$3");
+  }
+
+  function setBig(num, unit, cls, isWord) {
+    $("bigNum").textContent = num;
+    $("bigNum").className = "big-num" + (isWord ? " is-word" : "");
+    $("bigUnit").textContent = unit;
+    $("bigLine").className = "big " + (cls || "");
+  }
+
+  function scrollToCard() {
+    const el = $("cardSection");
+    if (!el || !el.getBoundingClientRect) return;
+    const r = el.getBoundingClientRect();
+    if (r.top < 0 || r.top > window.innerHeight * 0.6) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }
+
+  function citeText() {
+    return (
+      CITE_ONE_LINER +
+      " Benefit through " +
+      BENEFIT_LABEL +
+      " (ED). Business Insider Sep 1 2026 published an example (~$23/mo) — that is their math, not yours, and it is not shown as a calculated savings here."
+    );
+  }
+
+  /**
+   * opts.writeHash — update the address bar (only after a user action or when the page
+   * was opened from a share link, so a #toggle-goatcounter visit is never overwritten).
+   */
+  function renderCard(opts) {
+    const o = opts || {};
     const input = readInputs();
     const err = validate(input);
+    const hash = encodeHash(input);
+    $("shareUrl").value = location.href.split("#")[0] + hash;
+
     if (err) {
-      $("cardSection").hidden = true;
+      setBig("—", "", "unsure", true);
+      $("daysBar").hidden = true;
+      $("windowLine").textContent = "";
+      $("statusPill").hidden = true;
+      $("dlHeadline").textContent = err;
       $("status").textContent = err;
-      return;
+      return false;
     }
 
     const c = compute(input);
-    $("cardSection").hidden = false;
-    $("shareBox").hidden = false;
-    $("status").textContent = "Card ready — copy, share, or export PNG.";
+    if (o.announce) {
+      $("status").textContent = "Answer ready — share it, copy it, or save it as an image.";
+    } else if (o.clearStatus) {
+      $("status").textContent = "";
+    }
 
     const metaBits = [];
-    metaBits.push("Servicer autopay: " + c.ap.short);
     if (input.noteLabel) metaBits.push(input.noteLabel);
     $("cardMeta").textContent = metaBits.join(" · ");
 
-    $("dlHeadline").textContent = c.win.headline;
-    $("statusPill").textContent = c.ap.pill;
-    $("statusPill").className = "verdict-k " + c.ap.cls;
-    $("statusSub").textContent = c.ap.sub;
-
-    $("viewDateDisp").textContent = fmtDate(c.viewDate);
-    $("daysDisp").textContent = c.win.daysLabel;
-    $("deadlineLine").textContent = c.win.deadlineSub;
-
-    $("daysRingDisp").textContent = c.win.ringLabel;
-    $("daysRing").style.setProperty("--pct", String(c.pct));
-    if (c.win.phase === "closed") {
-      $("daysRing").className = "fee-ring empty";
-    } else if (c.win.phase === "last" || (c.daysLeft > 0 && c.daysLeft <= 7)) {
-      $("daysRing").className = "fee-ring danger";
-    } else if (c.ap.cls === "ok") {
-      $("daysRing").className = "fee-ring ok";
+    // Big answer
+    if (c.win.phase === "open") {
+      const urgent = c.daysLeft <= 7 ? "danger" : c.ap.cls === "ok" ? "ok" : "warn";
+      setBig(String(c.daysLeft), c.daysLeft === 1 ? "day left" : "days left", urgent, false);
+    } else if (c.win.phase === "last") {
+      setBig("Today", "is the last day", "danger", true);
     } else {
-      $("daysRing").className = "fee-ring";
+      setBig(c.win.daysLabel, "", "unsure", true);
     }
+    $("deadlineLine").textContent = keepTogether(c.win.deadlineSub);
 
+    const bar = $("daysBar");
     const windowEl = $("windowLine");
     if (c.win.phase === "closed") {
-      windowEl.className = "hero-sub danger";
+      bar.hidden = true;
       windowEl.textContent =
-        "Enroll-by passed · benefit window (if enrolled) through " +
-        BENEFIT_LABEL;
-    } else if (c.win.phase === "last") {
-      windowEl.className = "hero-sub danger";
-      windowEl.textContent = "Last calendar day of the enroll-by window";
+        "Deadline passed · if you were enrolled, the benefit runs through " + BENEFIT_LABEL;
     } else {
-      windowEl.className = "hero-sub warn";
+      bar.hidden = false;
+      bar.style.setProperty("--pct", String(c.pct));
+      bar.className =
+        "bar " + (c.win.phase === "last" || c.daysLeft <= 7 ? "danger" : c.ap.cls === "ok" ? "ok" : "");
       windowEl.textContent =
-        c.daysLeft +
-        " of " +
-        c.span +
-        " days remain in the Jun 18–Sep 30 public window";
+        c.win.phase === "last"
+          ? "Last calendar day of the enrollment window"
+          : c.daysLeft + " of " + c.span + " days remain in the Jun 18–Sep 30 public window";
     }
 
-    const flag = $("actionFlag");
-    flag.textContent = c.ap.flag;
-    flag.className = "look-enroll-flag " + c.ap.cls;
+    const pill = $("statusPill");
+    pill.hidden = false;
+    pill.textContent = c.ap.pill;
+    pill.className = "pill " + c.ap.cls;
+
+    $("dlHeadline").textContent = c.ap.flag;
+    setLinkedText($("actionLine"), c.ap.action);
 
     $("rAutopay").textContent = c.ap.short;
     $("rLoan").textContent = c.loan.short;
@@ -498,18 +554,12 @@
     $("rBenefit").textContent = BENEFIT_LABEL;
 
     $("decoderLine").textContent = c.ap.decoder + " " + c.loan.line;
-    $("actionLine").textContent = c.ap.action;
-    $("citeLine").textContent =
-      CITE_ONE_LINER +
-      " Benefit through " +
-      BENEFIT_LABEL +
-      " (ED). Business Insider Sep 1 2026 published an example (~$23/mo) — that is their math, not yours, and not shown as a computed savings here.";
+    $("citeLine").textContent = citeText();
 
-    const hash = encodeHash(input);
-    if (location.hash !== hash) {
+    if (o.writeHash && location.hash !== hash) {
       history.replaceState(null, "", hash);
     }
-    $("shareUrl").value = location.href.split("#")[0] + hash;
+    return true;
   }
 
   function clearAll() {
@@ -519,10 +569,11 @@
       directLoan: "unknown",
       noteLabel: "",
     });
-    $("cardSection").hidden = true;
-    $("shareBox").hidden = true;
+    if (location.hash.startsWith("#p=")) {
+      history.replaceState(null, "", location.pathname + location.search);
+    }
+    renderCard({});
     $("status").textContent = "Cleared.";
-    history.replaceState(null, "", location.pathname + location.search);
   }
 
   function summaryText() {
@@ -532,10 +583,10 @@
     const c = compute(input);
     const lines = [
       "Autopay Interest Deadline",
-      "View date: " + fmtDate(c.viewDate),
+      "Counting from: " + fmtDate(c.viewDate),
       "Countdown: " + c.win.daysLabel + " · " + c.win.deadlineSub,
       "Status: " + c.ap.pill + " · " + c.ap.sub,
-      "Direct Loan flag: " + c.loan.short,
+      "Direct Loan: " + c.loan.short,
       "Benefit through (ED): " + BENEFIT_LABEL,
       "",
       c.ap.decoder,
@@ -543,46 +594,90 @@
       c.ap.action,
       "",
       CITE_ONE_LINER,
-      "Not financial advice. Not SAVE plan advice. Eligibility not invented.",
+      "Not financial advice. Not SAVE plan advice. We never invent eligibility.",
     ];
     return lines.filter((x) => x != null).join("\n");
   }
 
-  async function copySummary() {
+  /** Clipboard with a fallback for older browsers / non-secure contexts. */
+  async function copyText(text) {
     try {
-      await navigator.clipboard.writeText(summaryText());
-      $("status").textContent = "Summary copied.";
+      if (navigator.clipboard && window.isSecureContext !== false) {
+        await navigator.clipboard.writeText(text);
+        return true;
+      }
     } catch (e) {
-      $("status").textContent = "Copy failed — select share URL instead.";
+      /* fall through */
+    }
+    try {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.setAttribute("readonly", "");
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      const ok = document.execCommand("copy");
+      document.body.removeChild(ta);
+      return ok;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function showLinkBox() {
+    const box = $("shareBox");
+    if (box) box.open = true;
+    const inp = $("shareUrl");
+    if (inp) {
+      inp.focus();
+      inp.select();
+    }
+  }
+
+  async function copySummary() {
+    if (await copyText(summaryText())) {
+      $("status").textContent = "Summary copied.";
+    } else {
+      $("status").textContent = "Couldn’t copy — select the link below instead.";
+      showLinkBox();
     }
   }
 
   async function shareLink() {
-    renderCard();
+    if (!renderCard({ writeHash: true })) return;
     const url = $("shareUrl").value;
     try {
       if (navigator.share) {
         await navigator.share({
           title: "Autopay Interest Deadline",
-          text: "Days left to Sep 30 for ED’s 1% autopay interest reduction — calendar literacy card",
+          text: "Days left to Sep 30 for ED’s 1% autopay interest reduction — a calendar card",
           url: url,
         });
         $("status").textContent = "Share sheet opened.";
-      } else {
-        await navigator.clipboard.writeText(url);
-        $("status").textContent = "Share link copied.";
+        return;
       }
     } catch (e) {
-      $("status").textContent = "Share cancelled or unavailable.";
+      if (e && e.name === "AbortError") {
+        $("status").textContent = "Share cancelled.";
+        return;
+      }
+    }
+    if (await copyText(url)) {
+      $("status").textContent = "Link copied — paste it anywhere.";
+    } else {
+      $("status").textContent = "Sharing isn’t available here — copy the link below.";
+      showLinkBox();
     }
   }
 
   async function copyShare() {
-    try {
-      await navigator.clipboard.writeText($("shareUrl").value);
-      $("status").textContent = "Share URL copied.";
-    } catch (e) {
-      $("status").textContent = "Copy failed.";
+    renderCard({ writeHash: true });
+    if (await copyText($("shareUrl").value)) {
+      $("status").textContent = "Link copied.";
+    } else {
+      $("status").textContent = "Couldn’t copy — select the link below.";
+      showLinkBox();
     }
   }
 
@@ -618,6 +713,8 @@
     ctx.closePath();
   }
 
+  const SANS = "system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
+
   function exportPng() {
     const input = readInputs();
     const err = validate(input);
@@ -631,147 +728,120 @@
     const W = canvas.width;
     const H = canvas.height;
 
-    ctx.fillStyle = "#0b0f14";
+    ctx.fillStyle = "#f6f6f3";
     ctx.fillRect(0, 0, W, H);
-    const g = ctx.createLinearGradient(0, 0, W, H);
-    g.addColorStop(0, "rgba(240,180,41,0.14)");
-    g.addColorStop(0.55, "rgba(0,0,0,0)");
-    g.addColorStop(1, "rgba(62,207,142,0.08)");
-    ctx.fillStyle = g;
-    ctx.fillRect(0, 0, W, H);
-
-    ctx.fillStyle = "#121820";
-    roundRect(ctx, 36, 36, W - 72, H - 72, 18);
+    ctx.fillStyle = "#ffffff";
+    roundRect(ctx, 36, 36, W - 72, H - 72, 24);
     ctx.fill();
-    ctx.strokeStyle = "#2e3a48";
+    ctx.strokeStyle = "#d5dae0";
     ctx.lineWidth = 2;
     ctx.stroke();
 
-    let y = 78;
-    ctx.fillStyle = "#7eb8e8";
-    ctx.font = "700 14px IBM Plex Sans, system-ui, sans-serif";
-    ctx.fillText("AUTOPAY INTEREST DEADLINE", 64, y);
-
-    y += 28;
-    ctx.fillStyle = "#8b9aab";
-    ctx.font = "400 13px IBM Plex Mono, monospace";
+    let y = 90;
+    ctx.fillStyle = "#4a5360";
+    ctx.font = "600 22px " + SANS;
+    ctx.fillText("Autopay Interest Deadline", 72, y);
+    y += 30;
+    ctx.font = "400 20px " + SANS;
     ctx.fillText(
-      fmtDate(c.viewDate) + " · " + c.ap.pill + " · ED 1% enroll-by",
-      64,
+      "Counting from " + fmtDate(c.viewDate) + (input.noteLabel ? " · " + input.noteLabel : ""),
+      72,
       y
     );
+    y += 140;
 
-    y += 52;
-    ctx.fillStyle = "#e8eef4";
-    ctx.font = "700 40px IBM Plex Sans, system-ui, sans-serif";
-    ctx.fillText(c.win.daysLabel, 64, y);
-
-    const chipX = W - 280;
-    const chipY = 96;
-    const chipFill =
-      c.ap.cls === "ok"
-        ? "rgba(62,207,142,0.14)"
-        : c.ap.cls === "danger"
-          ? "rgba(240,113,120,0.12)"
+    const color =
+      c.ap.cls === "danger" || c.win.phase === "last" || (c.win.phase === "open" && c.daysLeft <= 7)
+        ? "#b0261d"
+        : c.ap.cls === "ok"
+          ? "#1b7340"
           : c.ap.cls === "warn"
-            ? "rgba(240,180,41,0.12)"
-            : "rgba(139,154,171,0.12)";
-    const chipStroke =
-      c.ap.cls === "ok"
-        ? "#3ecf8e"
-        : c.ap.cls === "danger"
-          ? "#f07178"
-          : c.ap.cls === "warn"
-            ? "#f0b429"
-            : "#8b9aab";
-    ctx.fillStyle = chipFill;
-    ctx.strokeStyle = chipStroke;
-    ctx.lineWidth = 2;
-    roundRect(ctx, chipX, chipY, 200, 118, 12);
-    ctx.fill();
-    ctx.stroke();
-    ctx.fillStyle = "#8b9aab";
-    ctx.font = "700 11px IBM Plex Sans, system-ui, sans-serif";
-    ctx.fillText("STATUS (TEXT LABEL)", chipX + 14, chipY + 22);
-    ctx.fillStyle = chipStroke;
-    ctx.font = "700 15px IBM Plex Sans, system-ui, sans-serif";
-    wrapText(ctx, c.ap.pill, chipX + 14, chipY + 46, 172, 18);
-    ctx.fillStyle = "#e8eef4";
-    ctx.font = "600 11px IBM Plex Sans, system-ui, sans-serif";
-    wrapText(ctx, c.ap.sub, chipX + 14, chipY + 84, 172, 14);
+            ? "#85560a"
+            : "#16191d";
+    ctx.fillStyle = color;
+    if (c.win.phase === "open") {
+      ctx.font = "800 140px " + SANS;
+      const num = String(c.daysLeft);
+      ctx.fillText(num, 68, y);
+      const w = ctx.measureText(num).width;
+      ctx.fillStyle = "#16191d";
+      ctx.font = "700 40px " + SANS;
+      ctx.fillText(c.daysLeft === 1 ? "day left" : "days left", 68 + w + 20, y);
+    } else {
+      ctx.font = "800 72px " + SANS;
+      y = wrapText(ctx, c.win.daysLabel, 68, y - 40, W - 144, 80) - 40;
+    }
+    y += 60;
 
-    y += 28;
-    ctx.fillStyle = "#f0b429";
-    ctx.font = "700 13px IBM Plex Sans, system-ui, sans-serif";
-    y = wrapText(ctx, c.ap.flag, 64, y, W - 330, 18);
+    ctx.fillStyle = "#16191d";
+    ctx.font = "700 30px " + SANS;
+    y = wrapText(ctx, c.win.deadlineSub, 72, y, W - 144, 38);
+    y += 10;
 
+    ctx.font = "700 24px " + SANS;
+    ctx.fillStyle = color;
+    y = wrapText(ctx, c.ap.pill + " · " + c.ap.sub, 72, y, W - 144, 32);
     y += 8;
-    ctx.fillStyle = "#8b9aab";
-    ctx.font = "500 15px IBM Plex Sans, system-ui, sans-serif";
-    y = wrapText(ctx, c.win.deadlineSub, 64, y, W - 128, 22);
 
-    y += 16;
-    ctx.fillStyle = "#1a222c";
-    roundRect(ctx, 64, y, W - 128, 78, 10);
+    ctx.fillStyle = "#16191d";
+    ctx.font = "400 24px " + SANS;
+    y = wrapText(ctx, c.ap.flag, 72, y, W - 144, 32);
+    y += 18;
+
+    ctx.fillStyle = "#fff5dc";
+    roundRect(ctx, 64, y, W - 128, 90, 16);
     ctx.fill();
+    ctx.strokeStyle = "#e2bd5b";
+    ctx.stroke();
+    ctx.fillStyle = "#16191d";
+    ctx.font = "400 22px " + SANS;
+    wrapText(
+      ctx,
+      "Enroll in autopay in your loan servicer account — StudentAid.gov is not where you turn autopay on.",
+      88, y + 38, W - 176, 30
+    );
+    y += 120;
+
+    ctx.font = "700 22px " + SANS;
+    ctx.fillText("What to do next", 72, y);
+    y += 32;
+    ctx.font = "400 21px " + SANS;
+    y = wrapText(ctx, c.ap.action, 72, y, W - 144, 29);
+    y += 14;
+
     const cells = [
       ["Autopay", c.ap.short],
       ["Direct Loan", c.loan.short],
-      ["Enroll-by", "Sep 30 2026"],
-      ["Benefit thru", BENEFIT_LABEL],
+      ["Enroll by", "Sep 30 2026"],
+      ["Benefit through", BENEFIT_LABEL],
     ];
-    const cellW = (W - 128) / 4;
+    const cellW = (W - 144) / 4;
     cells.forEach((cell, i) => {
-      const cx = 64 + cellW * i + 14;
-      ctx.fillStyle = "#8b9aab";
-      ctx.font = "700 11px IBM Plex Sans, system-ui, sans-serif";
-      ctx.fillText(cell[0], cx, y + 28);
-      ctx.fillStyle = "#e8eef4";
-      ctx.font = "600 14px IBM Plex Mono, monospace";
-      ctx.fillText(cell[1], cx, y + 54);
+      const cx = 72 + cellW * i;
+      ctx.fillStyle = "#4a5360";
+      ctx.font = "400 17px " + SANS;
+      ctx.fillText(cell[0], cx, y + 10);
+      ctx.fillStyle = "#16191d";
+      ctx.font = "700 19px " + SANS;
+      ctx.fillText(cell[1], cx, y + 38);
     });
-    y += 100;
 
-    ctx.fillStyle = "#f0b429";
-    ctx.font = "700 13px IBM Plex Sans, system-ui, sans-serif";
-    ctx.fillText("CALENDAR LITERACY — NOT ELIGIBILITY", 64, y);
-    y += 24;
-    ctx.fillStyle = "#e8eef4";
-    ctx.font = "500 15px IBM Plex Sans, system-ui, sans-serif";
-    y = wrapText(ctx, c.ap.decoder + " " + c.loan.line, 64, y, W - 128, 22);
-
-    y += 14;
-    ctx.fillStyle = "#7eb8e8";
-    ctx.font = "700 13px IBM Plex Sans, system-ui, sans-serif";
-    ctx.fillText("NEXT STEP (NOT ADVICE)", 64, y);
-    y += 24;
-    ctx.fillStyle = "#e8eef4";
-    ctx.font = "500 15px IBM Plex Sans, system-ui, sans-serif";
-    y = wrapText(ctx, c.ap.action, 64, y, W - 128, 22);
-
-    y += 16;
-    ctx.fillStyle = "#8b9aab";
-    ctx.font = "400 12px IBM Plex Sans, system-ui, sans-serif";
-    y = wrapText(
+    ctx.fillStyle = "#4a5360";
+    ctx.font = "400 16px " + SANS;
+    wrapText(
       ctx,
-      "ED Jun 18 2026: 1% autopay interest reduction; enroll by Sep 30 2026 (or already enrolled) through Jun 30 2028. Enroll via servicer. Direct Loans originated after Jul 1 2012. We never invent your rate, savings, or eligibility. BI Sep 1 example math is theirs — not shown as yours.",
-      64,
-      y,
-      W - 128,
-      18
+      "ED Jun 18 2026: 1% autopay interest reduction; enroll by Sep 30 2026 (or be already enrolled) to benefit through Jun 30 2028. Enroll through your servicer. Direct Loans originated after Jul 1 2012. We never invent your rate, savings, or eligibility. The Business Insider Sep 1 example math is theirs — not shown as yours.",
+      72, H - 150, W - 144, 22
     );
-
-    ctx.fillStyle = "#8b9aab";
-    ctx.font = "400 12px IBM Plex Mono, monospace";
     ctx.fillText(
-      "Not financial advice · StudentAid.gov · your loan servicer · cite ED",
-      64,
+      "Not financial advice · StudentAid.gov · your loan servicer · source: ED",
+      72,
       H - 56
     );
 
     canvas.toBlob((blob) => {
       if (!blob) {
-        $("status").textContent = "PNG export failed.";
+        $("status").textContent = "Couldn’t create the image.";
         return;
       }
       const a = document.createElement("a");
@@ -784,16 +854,21 @@
         ".png";
       a.click();
       URL.revokeObjectURL(a.href);
-      $("status").textContent = "PNG downloaded.";
+      $("status").textContent = "Image saved.";
     });
   }
 
   function bind() {
     if (!$("viewDate").value) $("viewDate").value = todayISO();
     renderChips();
-    renderSources();
 
-    $("cardBtn").addEventListener("click", renderCard);
+    const live = () => renderCard({ writeHash: true, clearStatus: true });
+    ["autopay", "directLoan", "viewDate"].forEach((id) => $(id).addEventListener("change", live));
+    $("noteLabel").addEventListener("input", live);
+    $("cardBtn").addEventListener("click", () => {
+      renderCard({ writeHash: true, announce: true });
+      scrollToCard();
+    });
     $("clearBtn").addEventListener("click", clearAll);
     $("copySummary").addEventListener("click", copySummary);
     $("shareBtn").addEventListener("click", shareLink);
@@ -804,14 +879,17 @@
       const p = decodeHash();
       if (p) {
         applyInputs(p);
-        renderCard();
+        renderCard({ writeHash: true });
       }
     });
 
     const fromHash = decodeHash();
     if (fromHash) {
       applyInputs(fromHash);
-      renderCard();
+      renderCard({ writeHash: true });
+    } else {
+      // Show an answer straight away with the default inputs (today’s date).
+      renderCard({});
     }
   }
 
@@ -833,6 +911,15 @@
       parseISODate: parseISODate,
       DEADLINE_ISO: DEADLINE_ISO,
       SEEDS: SEEDS,
+      windowSpanDays: windowSpanDays,
+      validate: validate,
+      compute: compute,
+      CITE_ONE_LINER: CITE_ONE_LINER,
+      BENEFIT_END_ISO: BENEFIT_END_ISO,
+      ED_PRESS: ED_PRESS,
+      STUDENTAID: STUDENTAID,
+      BI_SEP1: BI_SEP1,
+      FORBES_JUL29: FORBES_JUL29,
     };
   }
 })();

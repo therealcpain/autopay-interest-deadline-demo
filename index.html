@@ -28,180 +28,159 @@
           async src="//gc.zgo.at/count.js"></script>
   <title>Autopay Interest Deadline — ED 1% reduction enroll-by Sep 30 2026</title>
   <meta name="description" content="Paste today’s date + autopay status. Get one shareable card: days left to Sep 30 2026 11:59 p.m. ET for ED’s temporary 1% autopay interest reduction, already-on-autopay vs enroll-via-servicer chip, Jun 30 2028 benefit footnote. Cite ED / StudentAid.gov. Not financial advice.">
-  <meta name="theme-color" content="#0b0f14">
   <meta property="og:title" content="Autopay Interest Deadline">
   <meta property="og:description" content="Paste today’s date + autopay status — days left to Sep 30 for ED’s 1% autopay interest reduction. Cite ED. Not financial advice.">
   <meta property="og:type" content="website">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <meta name="theme-color" content="#f6f6f3" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#111418" media="(prefers-color-scheme: dark)">
+  <meta name="color-scheme" content="light dark">
   <link rel="stylesheet" href="styles.css">
   <script src="app.js" defer></script>
 </head>
 <body>
   <div class="wrap">
     <header class="site">
-      <div class="brand">
-        <div class="brand-mark" aria-hidden="true">1%</div>
-        <div>
-          <h1>Autopay Interest Deadline</h1>
-          <p class="tagline">Paste date + autopay status → Sep 30 enroll-by countdown · servicer chip · share card.</p>
-        </div>
-      </div>
-      <span class="badge">Not financial advice</span>
+      <p class="eyebrow">Autopay Interest Deadline <span class="badge">Not financial advice</span></p>
+      <h1>How many days are left to enroll in autopay for the temporary 1% rate cut?</h1>
     </header>
 
-    <aside class="myth-banner" role="note">
-      <strong>Financial disclaimer.</strong>
-      This card is <em>calendar literacy</em> — <strong>not</strong> financial advice, <strong>not</strong> a Loan Simulator, <strong>not</strong> SAVE / repayment-plan advice, and <strong>not</strong> a determination that you are eligible.
-      Public ED framing only (Jun&nbsp;18&nbsp;2026): borrowers enrolled in auto pay may be eligible for a temporary <strong>1&nbsp;percent</strong> interest-rate reduction; enroll by <strong>September&nbsp;30,&nbsp;2026</strong> 11:59&nbsp;p.m.&nbsp;ET (or already enrolled) to benefit through <strong>June&nbsp;30,&nbsp;2028</strong>.
-      Enroll in autopay in your <strong>loan servicer</strong> account — not a StudentAid.gov autopay toggle.
-      ED’s public framing is for Direct Loans originated after Jul&nbsp;1&nbsp;2012; defaulted borrowers must restore good standing first. We never invent your rate, monthly savings, or eligibility.
-      Sources:
-      <a href="https://www.ed.gov/about/news/press-release/us-department-of-education-announces-student-loan-interest-rate-reduction" target="_blank" rel="noopener noreferrer">ED Jun 18 2026 press release</a>
-      ·
-      <a href="https://studentaid.gov/announcements-events/auto-pay-interest-rate-reduction" target="_blank" rel="noopener noreferrer">StudentAid.gov auto-pay interest-rate-reduction</a>.
-    </aside>
+    <div class="layout">
+      <section class="panel ask" aria-labelledby="ask-heading">
+        <h2 id="ask-heading" class="sr-only">Your autopay status</h2>
 
-    <section class="panel lookup" aria-labelledby="lookup-heading">
-      <h2 id="lookup-heading">1. Paste today’s date + autopay status</h2>
-      <p class="hint">
-        Your view date + whether you are already on <strong>servicer</strong> autopay. Optional: Direct Loan originated after Jul&nbsp;1&nbsp;2012 if you know.
-        Countdown is view-date vs the public <strong>Sep&nbsp;30&nbsp;2026 11:59&nbsp;p.m.&nbsp;ET</strong> enroll-by. We never invent a rate or monthly savings.
-      </p>
-
-      <div class="field-grid four">
-        <div>
-          <label for="viewDate">View date (when you’re looking)</label>
-          <input id="viewDate" type="date" required />
-        </div>
-        <div>
-          <label for="autopay">Already on servicer autopay?</label>
+        <div class="field">
+          <label for="autopay">Are you already on autopay with your loan servicer?</label>
           <select id="autopay">
-            <option value="unsure">Unsure / check servicer</option>
+            <option value="unsure">Not sure — I need to check with my servicer</option>
             <option value="yes">Yes — already enrolled</option>
             <option value="no">No — not on autopay</option>
           </select>
         </div>
-        <div>
-          <label for="directLoan">Direct Loan after Jul 1 2012? (optional)</label>
-          <select id="directLoan">
-            <option value="unknown">Unknown / not confirming</option>
-            <option value="yes">Yes — originated after Jul 1 2012</option>
-            <option value="no">No / other loan type</option>
-            <option value="unsure">Unsure</option>
-          </select>
-        </div>
-        <div>
-          <label for="noteLabel">Note label (optional)</label>
-          <input id="noteLabel" type="text" maxlength="64" placeholder="e.g. Redacted · family chat" autocomplete="off" />
-        </div>
-      </div>
 
-      <div class="actions">
-        <button type="button" class="btn btn-primary" id="cardBtn" onclick="window.goatcounter &amp;&amp; goatcounter.count({path: '/cta/generate', title: 'Generate card', event: true})">Show deadline card</button>
-        <button type="button" class="btn" id="clearBtn">Clear</button>
-      </div>
-      <p class="status" id="status" aria-live="polite"></p>
+        <details class="more">
+          <summary>Loan type, date, or label (optional)</summary>
+          <div class="more-body">
+            <div class="field">
+              <label for="directLoan">Is it a Direct Loan made after Jul 1 2012?</label>
+              <select id="directLoan">
+                <option value="unknown">Don’t know / not saying</option>
+                <option value="yes">Yes — made after Jul 1 2012</option>
+                <option value="no">No / other loan type</option>
+                <option value="unsure">Not sure</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="viewDate">Count the days from</label>
+              <input id="viewDate" type="date" required />
+              <p class="field-hint">Starts as today’s date.</p>
+            </div>
+            <div class="field">
+              <label for="noteLabel">Label for your card (optional)</label>
+              <input id="noteLabel" type="text" maxlength="64" placeholder="e.g. Mom’s loan" autocomplete="off" />
+            </div>
+          </div>
+        </details>
 
-      <h3 class="subhead">Seed examples (teaching dates)</h3>
-      <div class="seed-chips" id="seedChips" role="list" aria-label="Seed autopay deadline examples"></div>
-    </section>
-
-    <section class="panel card-panel" aria-labelledby="card-heading" id="cardSection" hidden>
-      <div class="card-toolbar">
-        <h2 id="card-heading">2. Shareable deadline card</h2>
         <div class="actions">
+          <button type="button" class="btn btn-primary" id="cardBtn" onclick="window.goatcounter &amp;&amp; goatcounter.count({path: '/cta/generate', title: 'Generate card', event: true})">Show my days left</button>
+          <button type="button" class="btn btn-quiet" id="clearBtn">Start over</button>
+        </div>
+        <p class="status" id="status" aria-live="polite"></p>
+      </section>
+
+      <section class="answer" id="cardSection" aria-labelledby="card-heading">
+        <h2 id="card-heading" class="sr-only">Your answer</h2>
+        <article class="card" id="deadlineCard" aria-labelledby="dlHeadline" aria-live="polite">
+          <div class="card-top">
+            <p class="card-brand">Autopay Interest Deadline</p>
+            <p class="card-meta" id="cardMeta"></p>
+          </div>
+
+          <p class="big" id="bigLine"><span class="big-num" id="bigNum">—</span><span class="big-unit" id="bigUnit"></span></p>
+          <p class="key-date" id="deadlineLine">Sep 30 2026 11:59 p.m. ET</p>
+          <div class="bar" id="daysBar" hidden><span></span></div>
+          <p class="bar-caption" id="windowLine"></p>
+
+          <span class="pill" id="statusPill">—</span>
+          <h3 class="meaning" id="dlHeadline">Days left to Sep 30?</h3>
+
+          <p class="caution">Enroll in autopay in your <strong>loan servicer</strong> account — StudentAid.gov is not where you turn autopay on.</p>
+
+          <p class="next"><span class="next-k">What to do next</span><span id="actionLine">Enroll in autopay in your loan servicer account.</span></p>
+
+          <dl class="facts" id="receiptStrip" aria-label="Your status">
+            <div><dt>Autopay</dt><dd id="rAutopay">—</dd></div>
+            <div><dt>Direct Loan</dt><dd id="rLoan">—</dd></div>
+            <div><dt>Enroll by</dt><dd id="rDeadline">Sep 30 2026</dd></div>
+            <div><dt>Benefit through</dt><dd id="rBenefit">Jun 30 2028</dd></div>
+          </dl>
+
+          <p class="card-disclaimer">For understanding the calendar only. Not financial advice · not SAVE plan advice · we never invent your rate, monthly savings, or eligibility.</p>
+        </article>
+
+        <div class="actions share-actions">
+          <button type="button" class="btn btn-primary" id="shareBtn">Share</button>
+          <button type="button" class="btn" id="copyShare">Copy link</button>
           <button type="button" class="btn" id="copySummary">Copy summary</button>
-          <button type="button" class="btn" id="shareBtn">Share link</button>
-          <button type="button" class="btn" id="pngBtn">Export PNG</button>
+          <button type="button" class="btn" id="pngBtn">Save as image</button>
         </div>
-      </div>
 
-      <!-- PRIMARY VISUAL: deadline card — giant days-left-to-Sep-30 badge + status chip -->
-      <article class="renewal-card" id="deadlineCard" aria-labelledby="dlHeadline">
-        <header class="card-head">
-          <div>
-            <p class="brand-line">Autopay Interest Deadline</p>
-            <p class="meta-line" id="cardMeta">—</p>
-            <h3 id="dlHeadline">Days left to Sep 30?</h3>
+        <details class="share-box" id="shareBox">
+          <summary>Show the link</summary>
+          <label for="shareUrl" class="sr-only">Link to this answer</label>
+          <div class="row">
+            <input id="shareUrl" type="text" readonly />
           </div>
-          <div class="verdict" id="statusBadge">
-            <span class="verdict-k" id="statusPill">—</span>
-            <span class="verdict-s" id="statusSub">Text-labeled · not color-only</span>
-          </div>
-        </header>
+          <p class="field-hint">The link reopens this page with the same answers filled in. When posting, you can add tracking tags, e.g. <code>?utm_source=reddit&amp;utm_medium=organic&amp;utm_campaign=autopay_interest_deadline_mvp</code></p>
+        </details>
+      </section>
 
-        <div class="hero-row">
-          <div class="hero-stat cy-lead">
-            <span class="hero-kicker">Enroll-by countdown (ED)</span>
-            <div class="face-allin-line" aria-label="Days left badge">
-              <span class="face-was"><span class="face-was-k">View date</span> <span id="viewDateDisp">—</span></span>
-              <span class="face-arrow" aria-hidden="true">→</span>
-              <span class="hero-value" id="daysDisp">—</span>
+      <div class="below">
+        <section class="panel">
+          <details class="fold" id="howItWorks">
+            <summary><h2>How this works</h2></summary>
+            <div class="fold-body">
+              <p class="dyn" id="decoderLine">—</p>
+              <ul class="explain-list">
+                <li>The Education Department’s (ED) public description (Jun&nbsp;18&nbsp;2026): borrowers enrolled in auto pay may be eligible for a temporary <strong>1&nbsp;percent</strong> interest-rate reduction. Enroll by <strong>September&nbsp;30,&nbsp;2026</strong> 11:59&nbsp;p.m.&nbsp;ET (or be already enrolled) to benefit through <strong>June&nbsp;30,&nbsp;2028</strong>.</li>
+                <li><strong>Days left</strong> counts from the date you picked to the public deadline: <strong>Sep&nbsp;30&nbsp;2026 11:59&nbsp;p.m.&nbsp;ET</strong>. Color is only a helper; the number (or “Today” / “Closed”) carries the meaning.</li>
+                <li><strong>Status</strong> is spelled out in words: <strong>already on autopay → no extra action</strong> for the temporary 1% reduction; <strong>not on autopay → enroll through your servicer</strong>; <strong>not sure → check with your servicer</strong>. Enroll in autopay in your <strong>loan servicer</strong> account — StudentAid.gov is <em>not</em> the autopay switch.</li>
+                <li><strong>Who it covers:</strong> ED’s public description is for Direct Loans originated (made) after Jul&nbsp;1&nbsp;2012; borrowers in default must get back into good standing first. The loan-type question is optional; if you leave it blank, the card says eligibility is <strong>not confirmed</strong>. We never invent that you qualify.</li>
+                <li><strong>How long it lasts:</strong> ED says the reduction runs through <strong>June&nbsp;30,&nbsp;2028</strong> if you enroll by Sep&nbsp;30 (or are already enrolled). The usual autopay reduction was 0.25%; borrowers already enrolled get an extra 0.75% automatically (1% total) — ED’s Jun&nbsp;18&nbsp;2026 public description, not an estimate for your loan.</li>
+                <li><strong>No made-up savings.</strong> Business Insider (Sep&nbsp;1&nbsp;2026) published an example (~$23/mo for a graduate borrower, $50k @ 7.94%). That is <em>their</em> example — it is not shown as your number on this card.</li>
+                <li>We only use what you choose here — <strong>no</strong> servicer login, and we don’t pull anything from your account. We never invent a rate or monthly savings.</li>
+                <li><strong>Financial disclaimer.</strong> This page explains the calendar only — <strong>not</strong> financial advice, <strong>not</strong> a Loan Simulator, <strong>not</strong> SAVE / repayment-plan advice, and <strong>not</strong> a decision that you are eligible. We never invent your rate, monthly savings, or eligibility.</li>
+              </ul>
+              <h3 class="sr-only">Sources</h3>
+              <p><strong>Sources</strong></p>
+              <ul class="source-list" id="sourceLinks">
+                <li><a href="https://www.ed.gov/about/news/press-release/us-department-of-education-announces-student-loan-interest-rate-reduction" target="_blank" rel="noopener noreferrer">ED Jun 18 2026 press release</a></li>
+                <li><a href="https://studentaid.gov/announcements-events/auto-pay-interest-rate-reduction" target="_blank" rel="noopener noreferrer">StudentAid.gov auto-pay interest-rate-reduction</a></li>
+                <li><a href="https://www.businessinsider.com/student-loan-borrowers-one-month-left-interest-rate-reduction-benefit-2026-9" target="_blank" rel="noopener noreferrer">Business Insider Sep 1 2026 (the example math is theirs)</a></li>
+                <li><a href="https://www.forbes.com/sites/adamminsky/2026/07/29/borrowers-have-63-days-to-enroll-student-loans-in-new-repayment-benefit-but-watch-for-pitfalls/" target="_blank" rel="noopener noreferrer">Forbes Jul 29 2026 (pitfalls)</a></li>
+              </ul>
+              <p class="cite-line" id="citeLine">—</p>
             </div>
-            <span class="hero-sub" id="deadlineLine">Sep 30 2026 11:59 p.m. ET</span>
-          </div>
-          <div class="hero-stat fee ring-stat">
-            <span class="hero-kicker">Days left badge</span>
-            <div class="ring-wrap" aria-hidden="true">
-              <div class="fee-ring" id="daysRing" style="--pct:0"></div>
-              <div class="ring-center">
-                <span class="hero-value" id="daysRingDisp">—</span>
-              </div>
+          </details>
+        </section>
+
+        <section class="panel">
+          <details class="fold" id="examples">
+            <summary><h2>Examples</h2></summary>
+            <div class="fold-body">
+              <p class="field-hint">Sample dates to see how the countdown works. Tap one to load it.</p>
+              <div class="seed-chips" id="seedChips" role="list" aria-label="Autopay deadline examples"></div>
             </div>
-            <span class="hero-sub" id="windowLine">—</span>
-          </div>
-        </div>
-
-        <p class="look-enroll-flag" id="actionFlag" aria-live="polite">—</p>
-
-        <div class="receipt-strip four" id="receiptStrip" aria-label="Status breakdown">
-          <div class="r-item"><span class="r-k">Autopay</span><span class="r-v" id="rAutopay">—</span></div>
-          <div class="r-item"><span class="r-k">Direct Loan flag</span><span class="r-v" id="rLoan">—</span></div>
-          <div class="r-item"><span class="r-k">Enroll-by</span><span class="r-v" id="rDeadline">Sep 30 2026</span></div>
-          <div class="r-item"><span class="r-k">Benefit through</span><span class="r-v" id="rBenefit">Jun 30 2028</span></div>
-        </div>
-
-        <p class="decoder-line" id="decoderLine">—</p>
-        <p class="action-line" id="actionLine">—</p>
-        <p class="cite-line" id="citeLine">—</p>
-
-        <footer class="card-foot">
-          <span>User-pasted status · no servicer login</span>
-          <span>Not financial advice · cite ED publicly · no invented eligibility</span>
-        </footer>
-      </article>
-
-      <div class="share-box" id="shareBox" hidden>
-        <label for="shareUrl">Share URL (hash restores your pasted fields)</label>
-        <div class="row">
-          <input id="shareUrl" type="text" readonly />
-          <button type="button" class="btn" id="copyShare" style="flex:0 0 auto">Copy</button>
-        </div>
-        <p class="hint">Append UTM when you post, e.g. <code>?utm_source=reddit&amp;utm_medium=organic&amp;utm_campaign=autopay_interest_deadline_mvp</code></p>
+          </details>
+        </section>
       </div>
+    </div>
 
-      <div class="source-links" id="sourceLinks"></div>
-    </section>
-
-    <section class="panel legend" aria-labelledby="legend-heading">
-      <h2 id="legend-heading">How to read the card</h2>
-      <ul class="legend-list">
-        <li><span class="pill allin">Days left</span> Countdown from <strong>your view date</strong> to the public enroll-by: <strong>Sep&nbsp;30&nbsp;2026 11:59&nbsp;p.m.&nbsp;ET</strong>. Color is secondary; the number (or TODAY / CLOSED) carries meaning.</li>
-        <li><span class="pill fee">Status chip</span> Text-labeled: <strong>already on autopay → no extra action</strong> for the temporary 1% reduction vs <strong>not on autopay → enroll via servicer</strong> vs <strong>unsure → check servicer</strong>. StudentAid.gov is <em>not</em> the autopay toggle.</li>
-        <li><span class="pill claim">Eligibility</span> Optional Direct Loan originated-after-Jul&nbsp;1&nbsp;2012 flag. If unknown, the card says eligibility is <strong>not confirmed</strong>. We never invent that you qualify.</li>
-        <li><strong>Benefit footnote</strong> ED: reduction through <strong>June&nbsp;30,&nbsp;2028</strong> if enrolled by Sep&nbsp;30 (or already enrolled). Baseline autopay reduction was 0.25%; already-enrolled borrowers get an additional 0.75% automatically (total 1%) — ED Jun&nbsp;18&nbsp;2026 public framing, not an estimate for your loan.</li>
-        <li><strong>No invented savings.</strong> Business Insider (Sep&nbsp;1&nbsp;2026) published an example (~$23/mo for a graduate borrower, $50k @ 7.94%). That is <em>their</em> example — it does not appear as your number on this card.</li>
-        <li><strong>Action line</strong> Enroll in autopay in your loan servicer account; details at the StudentAid.gov auto-pay interest-rate-reduction page. Not plan advice.</li>
-      </ul>
-    </section>
-
-    <footer>
-      <strong>Autopay Interest Deadline</strong> — calendar-honest share card for ED’s temporary 1% autopay interest reduction.
+    <footer class="site-foot">
+      <strong>Autopay Interest Deadline</strong> — a shareable calendar card for ED’s temporary 1% autopay interest reduction.
       <ul>
-        <li>View date · autopay yes/no/unsure → Sep 30 countdown + servicer chip</li>
-        <li>User paste only · zero scrape · not financial advice · not SAVE plan advice</li>
+        <li>Date to count from · autopay yes / no / not sure → Sep 30 countdown + servicer status</li>
+        <li>Uses only what you choose here · no data pulled · not financial advice · not SAVE plan advice</li>
         <li>Free utility · ad-supported path (see README)</li>
       </ul>
     </footer>
