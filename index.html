@@ -4,6 +4,26 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <!-- goatcounter-site: autopaydeadline · instrumented 2026-09-18 -->
+  <!--
+    gc-utm-keep v1 (Head of Data). GoatCounter records utm_source (or ref/src/source) as the
+    Referrer and utm_campaign as a Campaign, but deletes every utm_* key from the stored path, so
+    utm_medium / utm_content / utm_term are otherwise lost. This copies any utm_* values onto the
+    pageview path as u_* keys (kept by GoatCounter). Pageviews only; events send an explicit path.
+    Spec: institutions/data/MARKET_CONTACT_ROLLUP.md
+  -->
+  <script>
+    window.goatcounter = window.goatcounter || {};
+    window.goatcounter.path = function (p) {
+      try {
+        var q = new URLSearchParams(location.search), keep = [];
+        ["source", "medium", "campaign", "content", "term"].forEach(function (k) {
+          var v = q.get("utm_" + k);
+          if (v) keep.push("u_" + k + "=" + encodeURIComponent(v.slice(0, 80)));
+        });
+        return keep.length ? p + (p.indexOf("?") === -1 ? "?" : "&") + keep.join("&") : p;
+      } catch (e) { return p; }
+    };
+  </script>
   <script data-goatcounter="https://autopaydeadline.goatcounter.com/count"
           async src="//gc.zgo.at/count.js"></script>
   <title>Autopay Interest Deadline — ED 1% reduction enroll-by Sep 30 2026</title>
